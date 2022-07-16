@@ -62,7 +62,7 @@ def sleep_until(time):
             sleep(diff / 2)
 
 
-def sanitize_text(text: str) -> str:
+def sanitize_text(text: str, blacklist:list=None) -> str:
     r"""Sanitizes the text for tts.
         What gets removed:
      - following characters`^_~@!&;#:-%“”‘"%*/{}[]()\|<>?=+`
@@ -84,5 +84,14 @@ def sanitize_text(text: str) -> str:
     regex_expr = r"\s['|’]|['|’]\s|[\^_~@!&;#:\-–—%“”‘\"%\*/{}\[\]\(\)\\|<>=+]"
     result = re.sub(regex_expr, " ", result)
     result = result.replace("+", "plus").replace("&", "and")
+
+    #removing blacklisted words
+    if blacklist is not None:
+        if isinstance(blacklist, list):
+            for word in blacklist:
+                result = result.replace(word, '')
+        else:
+            result = result.replace(blacklist, '')
+
     # remove extra whitespace
     return " ".join(result.split())

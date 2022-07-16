@@ -55,8 +55,8 @@ class TTSEngine:
 
         print_step("Saving Text to MP3 files...")
 
-        self.call_tts("title", self.reddit_object["thread_title"])
-        if (
+        self.call_tts("title", self.reddit_object["thread_title"]) #AYA: converts title to mp3, saves it, modified self.length to the length of that clip
+        if ( #AYA story mode seems to read the post itself, not only the title.
             self.reddit_object["thread_post"] != ""
             and settings.config["settings"]["storymode"] == True
         ):
@@ -123,10 +123,10 @@ class TTSEngine:
             self.length = 0
 
 
-def process_text(text: str):
+def process_text(text: str, ignore='en'):
     lang = settings.config["reddit"]["thread"]["post_lang"]
     new_text = sanitize_text(text)
-    if lang:
+    if lang not in ignore:
         print_substep("Translating Text...")
         translated_text = ts.google(text, to_language=lang)
         new_text = sanitize_text(translated_text)

@@ -61,7 +61,7 @@ if __name__ == "__main__":
     config = settings.check_toml(".config.template.toml", "config.toml")
     config is False and exit()
     try:
-        if config["settings"]["times_to_run"]:
+        if config["settings"]["times_to_run"] > 1:
             run_many(config["settings"]["times_to_run"])
 
         elif len(config["reddit"]["thread"]["post_id"].split("+")) > 1:

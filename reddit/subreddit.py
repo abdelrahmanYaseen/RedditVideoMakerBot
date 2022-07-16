@@ -69,7 +69,8 @@ def get_subreddit_threads(POST_ID: str):
     ):
         submission = reddit.submission(id=settings.config["reddit"]["thread"]["post_id"])
     else:
-        threads = subreddit.hot(limit=25)
+        # threads = subreddit.hot(limit=25)
+        threads = subreddit.top(time_filter='year', limit=25)
         submission = get_subreddit_undone(threads, subreddit)
     submission = check_done(submission)  # double-checking
     if submission is None or not submission.num_comments:

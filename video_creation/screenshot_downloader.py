@@ -38,7 +38,7 @@ def download_screenshots_of_reddit_posts(reddit_object: dict, screenshot_num: in
             cookie_file = open("./video_creation/data/cookie-dark-mode.json", encoding="utf-8")
         else:
             cookie_file = open("./video_creation/data/cookie-light-mode.json", encoding="utf-8")
-        cookies = json.load(cookie_file)
+        cookies = json.loads(cookie_file.read())
         context.add_cookies(cookies)  # load preference cookies
         # Get the thread screenshot
         page = context.new_page()

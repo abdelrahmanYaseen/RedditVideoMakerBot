@@ -44,6 +44,13 @@ background_options = {
         "Achy Gaming",
         lambda t: ("center", 480 + t),
     ),
+    "goingballs": (  # GTA Stunt Race
+        "https://www.youtube.com/watch?v=bi1fp8goqmU",
+        "going-balls.mp4",
+        "OGLPLAYS Android iOS Gameplays",
+        lambda t: ("center", 200 + t),
+    ),
+    #
 }
 
 

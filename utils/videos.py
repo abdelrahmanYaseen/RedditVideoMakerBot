@@ -22,15 +22,27 @@ def check_done(
     """
     with open("./video_creation/data/videos.json", "r", encoding="utf-8") as done_vids_raw:
         done_videos = json.load(done_vids_raw)
-    for video in done_videos:
-        if video["id"] == str(redditobj):
-            if settings.config["reddit"]["thread"]["post_id"]:
-                print_step(
-                    "You already have done this video but since it was declared specifically in the config file the program will continue"
-                )
-                return redditobj
-            print_step("Getting new post as the current one has already been done")
-            return None
+    done_ids = [a['id'] for a in done_videos]
+    if str(redditobj) in done_ids:
+        if settings.config["reddit"]["thread"]["post_id"]:
+            print_step(
+                "You already have done this video but since it was declared specifically in the config file the program will continue"
+            )
+            return redditobj
+        print_step("Getting new post as the current one has already been done")
+        return None
+    # return redditobj
+
+
+    # for video in done_videos:
+    #     if video["id"] == str(redditobj):
+    #         if settings.config["reddit"]["thread"]["post_id"]:
+    #             print_step(
+    #                 "You already have done this video but since it was declared specifically in the config file the program will continue"
+    #             )
+    #             return redditobj
+    #         print_step("Getting new post as the current one has already been done")
+    #         return None
     return redditobj
 
 
