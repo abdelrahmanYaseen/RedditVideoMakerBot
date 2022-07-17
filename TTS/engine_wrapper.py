@@ -13,7 +13,7 @@ from utils.console import print_step, print_substep
 from utils.voice import sanitize_text
 from utils import settings
 
-DEFUALT_MAX_LENGTH: int = 50  # video length variable
+DEFUALT_MAX_LENGTH: int = 25  # video length variable
 
 
 class TTSEngine:
@@ -47,35 +47,52 @@ class TTSEngine:
 
         Path(self.path).mkdir(parents=True, exist_ok=True)
 
+
+
         # This file needs to be removed in case this post does not use post text, so that it won't appear in the final video
         try:
             Path(f"{self.path}/posttext.mp3").unlink()
         except OSError:
             pass
-
         print_step("Saving Text to MP3 files...")
+        self.call_tts("subreddit", self.reddit_object['subreddit'])
+        idx = 0
+        if 'type' in self.reddit_object.keys() and self.reddit_object['type'] == 'storymode':
+            for idx, item in track(enumerate(self.reddit_object['items']), "Saving..."):
+                self.call_tts(f"title_{idx}", item["thread_title"])  # AYA: converts title to mp3, saves it, modified self.length to the length of that clip
+                if item["thread_post"] != "":
+                    self.call_tts(f"posttext_{idx}", item["thread_post"])
+                if self.length > self.max_length:
+                    break
+            print_substep("Saved Text to MP3 files successfully.", style="bold green")
+            return self.length, idx
 
-        self.call_tts("title", self.reddit_object["thread_title"]) #AYA: converts title to mp3, saves it, modified self.length to the length of that clip
-        if ( #AYA story mode seems to read the post itself, not only the title.
-            self.reddit_object["thread_post"] != ""
-            and settings.config["settings"]["storymode"] == True
-        ):
-            self.call_tts("posttext", self.reddit_object["thread_post"])
+        else:
 
-        idx = None
-        for idx, comment in track(enumerate(self.reddit_object["comments"]), "Saving..."):
-            # ! Stop creating mp3 files if the length is greater than max length.
-            if self.length > self.max_length:
-                break
-            if (
-                len(comment["comment_body"]) > self.tts_module.max_chars
-            ):  # Split the comment if it is too long
-                self.split_post(comment["comment_body"], idx)  # Split the comment
-            else:  # If the comment is not too long, just call the tts engine
-                self.call_tts(f"{idx}", comment["comment_body"])
+            print_step("Saving Text to MP3 files...")
+            self.call_tts("subreddit", self.reddit_object["thread_subreddit"])
 
-        print_substep("Saved Text to MP3 files successfully.", style="bold green")
-        return self.length, idx
+            self.call_tts("title", self.reddit_object["thread_title"]) #AYA: converts title to mp3, saves it, modified self.length to the length of that clip
+            if ( #AYA story mode seems to read the post itself, not only the title.
+                self.reddit_object["thread_post"] != ""
+                and settings.config["settings"]["storymode"] == True
+            ):
+                self.call_tts("posttext", self.reddit_object["thread_post"])
+
+            idx = None
+            for idx, comment in track(enumerate(self.reddit_object["comments"]), "Saving..."):
+                # ! Stop creating mp3 files if the length is greater than max length.
+                if self.length > self.max_length:
+                    break
+                if (
+                    len(comment["comment_body"]) > self.tts_module.max_chars
+                ):  # Split the comment if it is too long
+                    self.split_post(comment["comment_body"], idx)  # Split the comment
+                else:  # If the comment is not too long, just call the tts engine
+                    self.call_tts(f"{idx}", comment["comment_body"])
+
+            print_substep("Saved Text to MP3 files successfully.", style="bold green")
+            return self.length, idx
 
     def split_post(self, text: str, idx: int):
         split_files = []

@@ -40,68 +40,111 @@ def download_screenshots_of_reddit_posts(reddit_object: dict, screenshot_num: in
             cookie_file = open("./video_creation/data/cookie-light-mode.json", encoding="utf-8")
         cookies = json.loads(cookie_file.read())
         context.add_cookies(cookies)  # load preference cookies
-        # Get the thread screenshot
-        page = context.new_page()
-        page.goto(reddit_object["thread_url"], timeout=0)
-        page.set_viewport_size(ViewportSize(width=1920, height=1080))
-        if page.locator('[data-testid="content-gate"]').is_visible():
-            # This means the post is NSFW and requires to click the proceed button.
-
-            print_substep("Post is NSFW. You are spicy...")
-            page.locator('[data-testid="content-gate"] button').click()
-            page.locator(
-                '[data-click-id="text"] button'
-            ).click()  # Remove "Click to see nsfw" Button in Screenshot
-
-        # translate code
-
-        if settings.config["reddit"]["thread"]["post_lang"]:
-            print_substep("Translating post...")
-            texts_in_tl = ts.google(
-                reddit_object["thread_title"],
-                to_language=settings.config["reddit"]["thread"]["post_lang"],
-            )
-
-            page.evaluate(
-                "tl_content => document.querySelector('[data-test-id=\"post-content\"] > div:nth-child(3) > div > div').textContent = tl_content",
-                texts_in_tl,
-            )
-        else:
-            print_substep("Skipping translation...")
-
-        page.locator('[data-test-id="post-content"]').screenshot(path="assets/temp/png/title.png")
-
-        if storymode:
-            page.locator('[data-click-id="text"]').screenshot(
-                path="assets/temp/png/story_content.png"
-            )
-        else:
-            for idx, comment in enumerate(
-                track(reddit_object["comments"], "Downloading screenshots...")
-            ):
-                # Stop if we have reached the screenshot_num
-                if idx >= screenshot_num:
+        if settings.config["settings"]["storymode"]:
+            for idx, thread in track(enumerate(reddit_object['items']), "Taking screenshots..."):
+                if idx > screenshot_num:
                     break
-
+                page = context.new_page()
+                page.goto(thread["thread_url"], timeout=0)
+                page.set_viewport_size(ViewportSize(width=1920, height=1080))
                 if page.locator('[data-testid="content-gate"]').is_visible():
-                    page.locator('[data-testid="content-gate"] button').click()
+                    # This means the post is NSFW and requires to click the proceed button.
 
-                page.goto(f'https://reddit.com{comment["comment_url"]}', timeout=0)
+                    print_substep("Post is NSFW. You are spicy...")
+                    page.locator('[data-testid="content-gate"] button').click()
+                    page.locator(
+                        '[data-click-id="text"] button'
+                    ).click()  # Remove "Click to see nsfw" Button in Screenshot
 
                 # translate code
 
                 if settings.config["reddit"]["thread"]["post_lang"]:
-                    comment_tl = ts.google(
-                        comment["comment_body"],
+                    print_substep("Translating post...")
+                    texts_in_tl = ts.google(
+                        reddit_object["thread_title"],
                         to_language=settings.config["reddit"]["thread"]["post_lang"],
                     )
-                    page.evaluate(
-                        '([tl_content, tl_id]) => document.querySelector(`#t1_${tl_id} > div:nth-child(2) > div > div[data-testid="comment"] > div`).textContent = tl_content',
-                        [comment_tl, comment["comment_id"]],
-                    )
 
-                page.locator(f"#t1_{comment['comment_id']}").screenshot(
-                    path=f"assets/temp/png/comment_{idx}.png"
+                    page.evaluate(
+                        "tl_content => document.querySelector('[data-test-id=\"post-content\"] > div:nth-child(3) > div > div').textContent = tl_content",
+                        texts_in_tl,
+                    )
+                else:
+                    print_substep("Skipping translation...")
+                if idx == 0:
+                    page.locator('[alt="Subreddit Icon"] >> xpath=..').first.screenshot(
+                        path="assets/temp/png/subreddit.png")
+                page.locator('[data-test-id="post-content"]').screenshot(path=f"assets/temp/png/title_{idx}.png")
+                if thread["thread_post"] != "":
+                    page.locator('[data-click-id="text"]').screenshot(
+                        path=f"assets/temp/png/content_{idx}.png"
+                    )
+        else:
+            # Get the thread screenshot
+            page = context.new_page()
+            page.goto(reddit_object["thread_url"], timeout=0)
+            page.set_viewport_size(ViewportSize(width=1920, height=1080))
+            if page.locator('[data-testid="content-gate"]').is_visible():
+                # This means the post is NSFW and requires to click the proceed button.
+
+                print_substep("Post is NSFW. You are spicy...")
+                page.locator('[data-testid="content-gate"] button').click()
+                page.locator(
+                    '[data-click-id="text"] button'
+                ).click()  # Remove "Click to see nsfw" Button in Screenshot
+
+            # translate code
+
+            if settings.config["reddit"]["thread"]["post_lang"]:
+                print_substep("Translating post...")
+                texts_in_tl = ts.google(
+                    reddit_object["thread_title"],
+                    to_language=settings.config["reddit"]["thread"]["post_lang"],
                 )
+
+                page.evaluate(
+                    "tl_content => document.querySelector('[data-test-id=\"post-content\"] > div:nth-child(3) > div > div').textContent = tl_content",
+                    texts_in_tl,
+                )
+            else:
+                print_substep("Skipping translation...")
+
+            page.locator('[alt="Subreddit Icon"] >> xpath=..').first.screenshot(
+                path="assets/temp/png/subreddit.png")
+            page.locator('[data-test-id="post-content"]').screenshot(path="assets/temp/png/title.png")
+
+
+            if storymode:
+                page.locator('[data-click-id="text"]').screenshot(
+                    path="assets/temp/png/story_content.png"
+                )
+            else:
+                for idx, comment in enumerate(
+                    track(reddit_object["comments"], "Downloading screenshots...")
+                ):
+                    # Stop if we have reached the screenshot_num
+                    if idx >= screenshot_num:
+                        break
+
+                    if page.locator('[data-testid="content-gate"]').is_visible():
+                        page.locator('[data-testid="content-gate"] button').click()
+
+                    page.goto(f'https://reddit.com{comment["comment_url"]}', timeout=0)
+
+                    # translate code
+
+                    if settings.config["reddit"]["thread"]["post_lang"]:
+                        comment_tl = ts.google(
+                            comment["comment_body"],
+                            to_language=settings.config["reddit"]["thread"]["post_lang"],
+                        )
+                        page.evaluate(
+                            '([tl_content, tl_id]) => document.querySelector(`#t1_${tl_id} > div:nth-child(2) > div > div[data-testid="comment"] > div`).textContent = tl_content',
+                            [comment_tl, comment["comment_id"]],
+                        )
+
+                    page.locator(f"#t1_{comment['comment_id']}").screenshot(
+                        path=f"assets/temp/png/comment_{idx}.png"
+                    )
 
         print_substep("Screenshots downloaded Successfully.", style="bold green")
