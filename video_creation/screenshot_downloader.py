@@ -72,8 +72,8 @@ def download_screenshots_of_reddit_posts(reddit_object: dict, screenshot_num: in
                 else:
                     print_substep("Skipping translation...")
                 if idx == 0:
-                    page.locator('[alt="Subreddit Icon"] >> xpath=..').first.screenshot(
-                        path="assets/temp/png/subreddit.png")
+                    page.locator('[alt="Subreddit Icon"]').last.screenshot(
+                        path="assets/temp/png/subreddit-icon.png")
                 page.locator('[data-test-id="post-content"]').screenshot(path=f"assets/temp/png/title_{idx}.png")
                 if thread["thread_post"] != "":
                     page.locator('[data-click-id="text"]').screenshot(

@@ -1,0 +1,85 @@
+{
+    "Showerthoughts": {
+        "latest_part": 1,
+        "items": [
+            {
+                "subreddit": "Showerthoughts",
+                "ids": "tq9o1b+s8o9tj+tb993g",
+                "time": "1658049421",
+                "background_credit": "bbswitzer",
+                "reddit_title": "showerthoughts part 1.mp4",
+                "filename": "showerthoughts part 1.mp4",
+                "part": 1
+            }
+        ]
+    },
+    "AskReddit": {
+        "latest_part": 1,
+        "items": [
+            {
+                "subreddit": "AskReddit",
+                "ids": "q18zrj+ts82um+olgt7p+t2eg6v+v8jcvm+opcv53+ru2wto",
+                "time": "1658062487",
+                "background_credit": "bbswitzer",
+                "reddit_title": "ask reddit part 1.mp4",
+                "filename": "ask reddit part 1.mp4",
+                "part": 1
+            }
+        ]
+    },
+    "LifeProTips": {
+        "latest_part": 3,
+        "items": [
+            {
+                "subreddit": "LifeProTips",
+                "ids": "th9cww+skrjpy+u6bwdo+q7ay9o+u42mrf+qtttwx+oqqp28+v5ha2b+oy15gy",
+                "time": "1658064024",
+                "background_credit": "bbswitzer",
+                "reddit_title": "life pro tips part 1.mp4",
+                "filename": "life pro tips part 1.mp4",
+                "part": 1
+            },
+            {
+                "subreddit": "LifeProTips",
+                "ids": "gj5t21",
+                "time": "1658067879",
+                "background_credit": "bbswitzer",
+                "reddit_title": "life pro tips part 2.mp4",
+                "filename": "life pro tips part 2.mp4",
+                "part": 2
+            },
+            {
+                "subreddit": "LifeProTips",
+                "ids": "k9sr0c+hdh76o",
+                "time": "1658068313",
+                "background_credit": "bbswitzer",
+                "reddit_title": "life pro tips part 3.mp4",
+                "filename": "life pro tips part 3.mp4",
+                "part": 3
+            }
+        ]
+    },
+    "UnethicalLifeProTips": {
+        "latest_part": 2,
+        "items": [
+            {
+                "subreddit": "UnethicalLifeProTips",
+                "ids": "x",
+                "time": "1658065687",
+                "background_credit": "bbswitzer",
+                "reddit_title": "unethical life pro tips part 1.mp4",
+                "filename": "unethical life pro tips part 1.mp4",
+                "part": 1
+            },
+            {
+                "subreddit": "UnethicalLifeProTips",
+                "ids": "vrmuw2+sg2jw5+vqj5t1+svvsya+vjxr55+ozxw4j",
+                "time": "1658076511",
+                "background_credit": "bbswitzer",
+                "reddit_title": "unethical life pro tips part 2.mp4",
+                "filename": "unethical life pro tips part 2.mp4",
+                "part": 2
+            }
+        ]
+    }
+}

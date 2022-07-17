@@ -6,7 +6,7 @@ from praw.models import MoreComments
 
 from utils.console import print_step, print_substep
 from utils.subreddit import get_subreddit_undone
-from utils.videos import check_done
+from utils.videos import check_done, isdone
 from utils.voice import sanitize_text
 
 
@@ -25,7 +25,6 @@ def get_subreddit_threads(POST_ID: str, post_type: str = 'top', time_filter: str
     if settings.config["reddit"]["creds"]["2fa"]:
         print("\nEnter your two-factor authentication code from your authenticator app.\n")
         code = input("> ")
-        print()
         pw = settings.config["reddit"]["creds"]["password"]
         passkey = f"{pw}:{code}"
     else:
@@ -103,16 +102,19 @@ def get_subreddit_threads(POST_ID: str, post_type: str = 'top', time_filter: str
                     }
         for submission in threads:
             content = {}
+            content["thread_id"] = submission.id
+            if isdone(content["thread_id"]):
+                continue
             content["thread_subreddit"] = sub
             content["thread_url"] = f"https://reddit.com{submission.permalink}"
             content["thread_title"] = submission.title
             content["thread_post"] = submission.selftext
-            content["thread_id"] = submission.id
             contents['items'].append(content)
 
         print_substep("[STORYMODE] Received subreddit threads Successfully.", style="bold green")
         return contents
-    else:  # if not story mode
+    else:# if not story mode
+        content={}
         if POST_ID:  # would only be called if there are multiple queued posts
             submission = reddit.submission(id=POST_ID)
         elif (

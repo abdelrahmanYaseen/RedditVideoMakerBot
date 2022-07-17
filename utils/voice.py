@@ -74,6 +74,13 @@ def sanitize_text(text: str, blacklist:list=None) -> str:
     Returns:
         str: Sanitized text
     """
+    blacklist = ['ILPT','ULPT', 'LPT']
+    mappings = {
+        ' bc ':' because ',
+       ' bcz ':' because ',
+        ' wtf ' : 'what the heck',
+        'aww': ''
+    }
 
     # remove any urls from the text
     regex_urls = r"((http|https)\:\/\/)?[a-zA-Z0-9\.\/\?\:@\-_=#]+\.([a-zA-Z]){2,6}([a-zA-Z0-9\.\&\/\?\:@\-_=#])*"
@@ -92,6 +99,9 @@ def sanitize_text(text: str, blacklist:list=None) -> str:
                 result = result.replace(word, '')
         else:
             result = result.replace(blacklist, '')
+
+    for key, val in mappings.items():
+        result = result.replace(key, val)
 
     # remove extra whitespace
     return " ".join(result.split())

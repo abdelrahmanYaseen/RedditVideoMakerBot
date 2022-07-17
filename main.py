@@ -12,6 +12,7 @@ from video_creation.background import (
     chop_background_video,
     get_background_config,
 )
+from utils.videos import get_part_num
 from video_creation.final_video import make_final_video, make_final_video_v2
 from video_creation.screenshot_downloader import download_screenshots_of_reddit_posts
 from video_creation.voices import save_text_to_mp3
@@ -50,8 +51,11 @@ def main(POST_ID=None):
 def my_main():
     cleanup()
     settings.config["settings"]["storymode"] = True
+    subreddit = settings.config["reddit"]["thread"]["subreddit"]
+    part = get_part_num(subreddit) + 1
     # postids = settings.config["reddit"]["thread"]["post_id"].split("+")
-    reddit_object = get_subreddit_threads(None, part='1')
+    # post_ids = "gj5t21,k9sr0c,hdh76o".split(",")
+    reddit_object = get_subreddit_threads(None, part=str(part))
     length, number_of_posts = save_text_to_mp3(reddit_object)
     length = math.ceil(length)
     download_screenshots_of_reddit_posts(reddit_object, number_of_posts)

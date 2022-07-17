@@ -117,6 +117,7 @@ def chop_background_video(background_config: Tuple[str, str, str, Any], video_le
 
     start_time, end_time = get_start_and_end_times(video_length, background.duration)
     try:
+        raise OSError
         ffmpeg_extract_subclip(
             f"assets/backgrounds/{choice}",
             start_time,

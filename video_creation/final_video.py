@@ -6,7 +6,7 @@ from os.path import exists
 from typing import Tuple, Any
 from moviepy.audio.AudioClip import concatenate_audioclips, CompositeAudioClip
 from moviepy.audio.io.AudioFileClip import AudioFileClip
-from moviepy.video.VideoClip import ImageClip
+from moviepy.video.VideoClip import ImageClip, TextClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from moviepy.video.compositing.concatenate import concatenate_videoclips
 from moviepy.video.io.VideoFileClip import VideoFileClip
@@ -15,7 +15,7 @@ from rich.console import Console
 
 from utils.cleanup import cleanup
 from utils.console import print_step, print_substep
-from utils.videos import save_data
+from utils.videos import save_data, save_data_v2
 from utils import settings
 
 console = Console()
@@ -41,6 +41,26 @@ def name_normalize(name: str) -> str:
     else:
         return name
 
+def generate_intro_image(subreddit_name, part, left_margin = 150):
+    duration = 1
+    bg_path = 'assets/backgrounds/subreddit-dark-backgound.png'
+    fg_path = 'assets/temp/png/subreddit-icon.png'
+    txt_path = 'assets/temp/png/introtext.png'
+    bg = ImageClip(bg_path, duration=duration)
+    fg = (ImageClip(fg_path)
+              .set_duration(duration)
+              .resize(height=bg.h*0.5, width = bg.w/2) # if you need to resize...
+              .margin(left=50, top=8, opacity=0) # (optional) logo-border padding
+              .set_pos((left_margin,"center")))
+
+    TextClip(txt=f"{subreddit_name} - Part {part}", fontsize=40, color="white",
+                   font="Verdana").set_position(
+                       (left_margin + fg.w + 30 , H / 2 - 20)).set_duration(duration).save_frame(txt_path)
+    txt = ImageClip(txt_path, duration=1).set_position((left_margin + fg.w + 30,"center"))
+    final = CompositeVideoClip([bg, fg, txt])
+    final.save_frame('assets/temp/png/intro.png')
+
+
 
 def make_final_video(
         number_of_clips: int,
@@ -61,6 +81,8 @@ def make_final_video(
     #    print('No background audio volume found in config.toml. Using default value of 1.')
     #    VOLUME_MULTIPLIER = 1
     print_step("Creating the final video 🎥")
+    subreddit = settings.config["reddit"]["thread"]["subreddit"]
+
     VideoFileClip.reW = lambda clip: clip.resize(width=W)
     VideoFileClip.reH = lambda clip: clip.resize(width=H)
     opacity = settings.config["settings"]["opacity"]
@@ -126,7 +148,6 @@ def make_final_video(
     idx = re.sub(r"[^\w\s-]", "", reddit_obj["thread_id"])
 
     filename = f"{name_normalize(title)}.mp4"
-    subreddit = settings.config["reddit"]["thread"]["subreddit"]
 
     if not exists(f"./results/{subreddit}"):
         print_substep("The results folder didn't exist so I made it")
@@ -193,6 +214,10 @@ def make_final_video_v2(
         return
 
     print_step("Creating the final video 🎥")
+
+    subreddit = settings.config["reddit"]["thread"]["subreddit"]
+    generate_intro_image(subreddit, reddit_obj['part'])
+
     VideoFileClip.reW = lambda clip: clip.resize(width=W)
     VideoFileClip.reH = lambda clip: clip.resize(width=H)
     opacity = settings.config["settings"]["opacity"]
@@ -217,7 +242,7 @@ def make_final_video_v2(
     new_opacity = 1 if opacity is None or float(opacity) >= 1 else float(opacity)
     image_clips.insert(
         0,
-        ImageClip("assets/temp/png/subreddit.png")
+        ImageClip("assets/temp/png/intro.png")
             .set_duration(audio_clips[0].duration)
             .resize(width=W + 100)
             .set_opacity(new_opacity),
@@ -250,7 +275,7 @@ def make_final_video_v2(
     # title = re.sub(r"[^\w\s-]", "", reddit_obj["thread_title"])
     # idx = re.sub(r"[^\w\s-]", "", reddit_obj["thread_id"])
 
-    filename = f"{name_normalize(reddit_obj['subreddit'])}_part{reddit_obj['part']}.mp4"
+    filename = f"{name_normalize(reddit_obj['subreddit'])}.mp4"
     subreddit = settings.config["reddit"]["thread"]["subreddit"]
 
     if not exists(f"./results/{subreddit}"):
@@ -279,10 +304,11 @@ def make_final_video_v2(
         final.duration,
         targetname=f"results/{subreddit}/{filename}",
     )
-    save_data(subreddit, filename, filename, reddit_obj['part'], background_config[2])
+    ids = [a['thread_id'] for a in reddit_obj['items'][:number_of_clips]]
+    save_data_v2(subreddit, filename, filename, ids, background_config[2])
     # print_step("Removing temporary files 🗑")
-    # cleanups = cleanup()
-    # print_substep(f"Removed {cleanups} temporary files 🗑")
+    cleanups = cleanup()
+    print_substep(f"Removed {cleanups} temporary files 🗑")
     print_substep("See result in the results folder!")
 
     # print_step(
