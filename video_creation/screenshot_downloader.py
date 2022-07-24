@@ -10,7 +10,7 @@ from playwright.async_api import async_playwright  # pylint: disable=unused-impo
 from playwright.sync_api import sync_playwright, ViewportSize
 from rich.progress import track
 import translators as ts
-
+from utils.subreddit import shouldSkip
 from utils.console import print_step, print_substep
 
 storymode = False
@@ -40,8 +40,11 @@ def download_screenshots_of_reddit_posts(reddit_object: dict, screenshot_num: in
             cookie_file = open("./video_creation/data/cookie-light-mode.json", encoding="utf-8")
         cookies = json.loads(cookie_file.read())
         context.add_cookies(cookies)  # load preference cookies
+        saved_subreddit_icon = False
         if settings.config["settings"]["storymode"]:
             for idx, thread in track(enumerate(reddit_object['items']), "Taking screenshots..."):
+                if shouldSkip(thread):
+                    continue
                 if idx > screenshot_num:
                     break
                 page = context.new_page()
@@ -71,14 +74,15 @@ def download_screenshots_of_reddit_posts(reddit_object: dict, screenshot_num: in
                     )
                 else:
                     print_substep("Skipping translation...")
-                if idx == 0:
+                if not saved_subreddit_icon:
                     page.locator('[alt="Subreddit Icon"]').last.screenshot(
                         path="assets/temp/png/subreddit-icon.png")
+                    saved_subreddit_icon = True
                 page.locator('[data-test-id="post-content"]').screenshot(path=f"assets/temp/png/title_{idx}.png")
-                if thread["thread_post"] != "":
-                    page.locator('[data-click-id="text"]').screenshot(
-                        path=f"assets/temp/png/content_{idx}.png"
-                    )
+                # if thread["thread_post"] != "":
+                #     page.locator('[data-click-id="text"]').screenshot(
+                #         path=f"assets/temp/png/content_{idx}.png"
+                #     )
         else:
             # Get the thread screenshot
             page = context.new_page()

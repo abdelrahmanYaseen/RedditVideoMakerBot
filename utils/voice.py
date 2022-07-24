@@ -62,7 +62,7 @@ def sleep_until(time):
             sleep(diff / 2)
 
 
-def sanitize_text(text: str, blacklist:list=None) -> str:
+def sanitize_text(text: str, blacklist: list = None) -> str:
     r"""Sanitizes the text for tts.
         What gets removed:
      - following characters`^_~@!&;#:-%“”‘"%*/{}[]()\|<>?=+`
@@ -74,13 +74,16 @@ def sanitize_text(text: str, blacklist:list=None) -> str:
     Returns:
         str: Sanitized text
     """
-    blacklist = ['ILPT','ULPT', 'LPT']
+    blacklist = ['ILPT', 'ULPT', 'LPT']
     mappings = {
-        ' bc ':' because ',
-       ' bcz ':' because ',
-        ' wtf ' : 'what the heck',
+        '&': ' and ',
+        ' bc ': ' because ',
+        ' bcz ': ' because ',
+        ' wtf ': 'what the heck',
         'aww': ''
     }
+    for key, val in mappings.items():
+        text = text.replace(key, val)
 
     # remove any urls from the text
     regex_urls = r"((http|https)\:\/\/)?[a-zA-Z0-9\.\/\?\:@\-_=#]+\.([a-zA-Z]){2,6}([a-zA-Z0-9\.\&\/\?\:@\-_=#])*"
@@ -92,16 +95,13 @@ def sanitize_text(text: str, blacklist:list=None) -> str:
     result = re.sub(regex_expr, " ", result)
     result = result.replace("+", "plus").replace("&", "and")
 
-    #removing blacklisted words
+    # removing blacklisted words
     if blacklist is not None:
         if isinstance(blacklist, list):
             for word in blacklist:
                 result = result.replace(word, '')
         else:
             result = result.replace(blacklist, '')
-
-    for key, val in mappings.items():
-        result = result.replace(key, val)
 
     # remove extra whitespace
     return " ".join(result.split())

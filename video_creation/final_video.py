@@ -17,6 +17,7 @@ from utils.cleanup import cleanup
 from utils.console import print_step, print_substep
 from utils.videos import save_data, save_data_v2
 from utils import settings
+from utils.subreddit import shouldSkip
 
 console = Console()
 W, H = 1080, 1920
@@ -41,25 +42,25 @@ def name_normalize(name: str) -> str:
     else:
         return name
 
-def generate_intro_image(subreddit_name, part, left_margin = 150):
+
+def generate_intro_image(subreddit_name, part, left_margin=150):
     duration = 1
     bg_path = 'assets/backgrounds/subreddit-dark-backgound.png'
     fg_path = 'assets/temp/png/subreddit-icon.png'
     txt_path = 'assets/temp/png/introtext.png'
     bg = ImageClip(bg_path, duration=duration)
     fg = (ImageClip(fg_path)
-              .set_duration(duration)
-              .resize(height=bg.h*0.5, width = bg.w/2) # if you need to resize...
-              .margin(left=50, top=8, opacity=0) # (optional) logo-border padding
-              .set_pos((left_margin,"center")))
+          .set_duration(duration)
+          .resize(height=bg.h * 0.5, width=bg.w / 2)  # if you need to resize...
+          .margin(left=50, top=8, opacity=0)  # (optional) logo-border padding
+          .set_pos((left_margin, "center")))
 
     TextClip(txt=f"{subreddit_name} - Part {part}", fontsize=40, color="white",
-                   font="Verdana").set_position(
-                       (left_margin + fg.w + 30 , H / 2 - 20)).set_duration(duration).save_frame(txt_path)
-    txt = ImageClip(txt_path, duration=1).set_position((left_margin + fg.w + 30,"center"))
+             font="Verdana").set_position(
+        (left_margin + fg.w + 30, H / 2 - 20)).set_duration(duration).save_frame(txt_path)
+    txt = ImageClip(txt_path, duration=1).set_position((left_margin + fg.w + 30, "center"))
     final = CompositeVideoClip([bg, fg, txt])
     final.save_frame('assets/temp/png/intro.png')
-
 
 
 def make_final_video(
@@ -231,7 +232,8 @@ def make_final_video_v2(
     # Gather all audio clips
     audio_clips = []
     audio_clips.append(AudioFileClip("assets/temp/mp3/subreddit.mp3"))
-    audio_clips += [AudioFileClip(f"assets/temp/mp3/title_{i}.mp3") for i in range(number_of_clips)]
+    audio_clips += [AudioFileClip(f"assets/temp/mp3/title_{i}.mp3") for i in range(number_of_clips) if
+                    not shouldSkip(reddit_obj['items'][i])]
     audio_concat = concatenate_audioclips(audio_clips)
     audio_composite = CompositeAudioClip([audio_concat])
 
@@ -248,11 +250,14 @@ def make_final_video_v2(
             .set_opacity(new_opacity),
     )
 
-
+    j=-1
     for i in range(0, number_of_clips):
+        if shouldSkip(reddit_obj['items'][i]):
+            continue
+        j += 1
         image_clips.append(
             ImageClip(f"assets/temp/png/title_{i}.png")
-                .set_duration(audio_clips[i + 1].duration)
+                .set_duration(audio_clips[j + 1].duration)
                 .resize(width=W - 100)
                 .set_opacity(new_opacity)
         )

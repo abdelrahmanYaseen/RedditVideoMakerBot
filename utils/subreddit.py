@@ -5,6 +5,12 @@ from utils import settings
 from utils.console import print_substep
 
 
+def shouldSkip(thread):
+    blacklist = ['announcement', 'request', ' mod ', ' moderators ', ' moderator ']
+    _bool = [word in thread['thread_title'].lower() for word in blacklist]
+    _bool += [word in thread['thread_post'].lower() for word in blacklist]
+    return any(_bool)
+
 def get_subreddit_undone(submissions: list, subreddit):
     """_summary_
 

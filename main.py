@@ -6,7 +6,8 @@ from reddit.subreddit import get_subreddit_threads
 from utils.cleanup import cleanup
 from utils.console import print_markdown, print_step
 from utils import settings
-
+#TODO: fix video cropping bug
+#TODO: add pauses between audios.
 from video_creation.background import (
     download_background,
     chop_background_video,
@@ -48,20 +49,28 @@ def main(POST_ID=None):
     chop_background_video(bg_config, length)
     make_final_video(number_of_comments, length, reddit_object, bg_config)
 
+
+from time import sleep
 def my_main():
-    cleanup()
-    settings.config["settings"]["storymode"] = True
-    subreddit = settings.config["reddit"]["thread"]["subreddit"]
-    part = get_part_num(subreddit) + 1
-    # postids = settings.config["reddit"]["thread"]["post_id"].split("+")
-    # post_ids = "gj5t21,k9sr0c,hdh76o".split(",")
-    reddit_object = get_subreddit_threads(None, part=str(part))
-    length, number_of_posts = save_text_to_mp3(reddit_object)
-    length = math.ceil(length)
-    download_screenshots_of_reddit_posts(reddit_object, number_of_posts)
-    bg_config = get_background_config()
-    chop_background_video(bg_config, length)
-    make_final_video_v2(number_of_posts + 1, length, reddit_object, bg_config)
+    for i in range(config["settings"]["times_to_run"]):
+        try:
+            cleanup()
+            settings.config["settings"]["storymode"] = True
+            subreddit = settings.config["reddit"]["thread"]["subreddit"]
+            part = get_part_num(subreddit) + 1
+            # postids = settings.config["reddit"]["thread"]["post_id"].split("+")
+            # post_ids = "ivsw47,k4stku,lxt9ld".split(",")
+            reddit_object = get_subreddit_threads(None, part=str(part), post_type="top", time_filter='year')
+            length, number_of_posts = save_text_to_mp3(reddit_object)
+            length = math.ceil(length)
+            download_screenshots_of_reddit_posts(reddit_object, number_of_posts)
+            bg_config = get_background_config()
+            chop_background_video(bg_config, length)
+            make_final_video_v2(number_of_posts + 1, length, reddit_object, bg_config)
+        except Exception as e:
+            print_step(f"ERROR AT ITERATION {i}")
+            print(e)
+            sleep(60)
 
 
 

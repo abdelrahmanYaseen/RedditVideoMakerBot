@@ -12,8 +12,10 @@ from moviepy.editor import AudioFileClip, CompositeAudioClip, concatenate_audioc
 from utils.console import print_step, print_substep
 from utils.voice import sanitize_text
 from utils import settings
+from utils.subreddit import shouldSkip
 
-DEFUALT_MAX_LENGTH: int = 50  # video length variable
+
+DEFUALT_MAX_LENGTH: int = 35  # video length variable
 
 
 class TTSEngine:
@@ -59,9 +61,11 @@ class TTSEngine:
         idx = 0
         if 'type' in self.reddit_object.keys() and self.reddit_object['type'] == 'storymode':
             for idx, item in track(enumerate(self.reddit_object['items']), "Saving..."):
+                if shouldSkip(item):
+                    continue
                 self.call_tts(f"title_{idx}", item["thread_title"])  # AYA: converts title to mp3, saves it, modified self.length to the length of that clip
-                if item["thread_post"] != "":
-                    self.call_tts(f"posttext_{idx}", item["thread_post"])
+                # if item["thread_post"] != "":
+                #     self.call_tts(f"posttext_{idx}", item["thread_post"])
                 if self.length > self.max_length:
                     break
             print_substep("Saved Text to MP3 files successfully.", style="bold green")
@@ -137,7 +141,7 @@ class TTSEngine:
             self.length += clip.duration
             clip.close()
         except:
-            self.length = 0
+            self.length = self.length
 
 
 def process_text(text: str, ignore='en'):

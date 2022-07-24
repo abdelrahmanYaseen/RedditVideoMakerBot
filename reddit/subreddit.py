@@ -1,5 +1,5 @@
 import re
-
+import random
 from utils import settings
 import praw
 from praw.models import MoreComments
@@ -78,7 +78,9 @@ def get_subreddit_threads(POST_ID: str, post_type: str = 'top', time_filter: str
             if post_type == 'top':
                 threads = subreddit.top(time_filter=time_filter, limit=25)
             elif post_type == 'hot':
-                threads = subreddit.hot(limit=25)
+                threads = subreddit.hot(limit=300)
+            elif post_type == 'random':
+                threads = subreddit.random(limit=300)
             else:
                 threads = subreddit.controversial(time_filter=time_filter)
 
@@ -110,7 +112,7 @@ def get_subreddit_threads(POST_ID: str, post_type: str = 'top', time_filter: str
             content["thread_title"] = submission.title
             content["thread_post"] = submission.selftext
             contents['items'].append(content)
-
+        random.shuffle(contents['items'])
         print_substep("[STORYMODE] Received subreddit threads Successfully.", style="bold green")
         return contents
     else:# if not story mode
